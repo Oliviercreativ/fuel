@@ -112,9 +112,10 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
     setOpen(false);
   }
 
-  function handleVehicleChange(id: string) {
+  function handleVehicleChange(id: string | null) {
+    if (!id) return;
     setVehicleId(id);
-    setUserEditedPrice(false); // Reset so price auto-fills for new fuel type
+    setUserEditedPrice(false);
     setPricePerLiter("");
   }
 
