@@ -36,7 +36,7 @@ export function AddVehicleDialog({ onAdd }: AddVehicleDialogProps) {
   const [year, setYear] = useState(String(currentYear));
   const [plate, setPlate] = useState("");
   const [fuelType, setFuelType] = useState<FuelType>("e10");
-  const [color, setColor] = useState(VEHICLE_COLORS[0].value);
+  const [color, setColor] = useState<string>(VEHICLE_COLORS[0].value);
   const [km, setKm] = useState("");
 
   const canSubmit = brand.trim() && model.trim();
