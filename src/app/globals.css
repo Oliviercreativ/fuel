@@ -124,6 +124,20 @@
   }
 }
 
+/* Force dark text in all form fields */
+input,
+textarea,
+select,
+[data-slot="input"],
+[data-slot="select-trigger"],
+[data-slot="select-value"] {
+  color: #1C1917 !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #A8A29E !important;
+}
+
 /* Noise texture overlay */
 .noise-bg {
   position: relative;

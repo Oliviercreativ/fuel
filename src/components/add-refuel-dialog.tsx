@@ -54,8 +54,9 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
   const [pricePerLiter, setPricePerLiter] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [prices, setPrices] = useState<FuelPrices | null>(null);
+  const [userEditedPrice, setUserEditedPrice] = useState(false);
 
-  // Load average prices
+  // Load average prices from data.gouv API
   useEffect(() => {
     if (!open) return;
     fetch("/api/fuel-prices")
@@ -64,26 +65,25 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
       .catch(() => {});
   }, [open]);
 
-  // Auto-select first vehicle
+  // Auto-select first vehicle on open
   useEffect(() => {
-    if (vehicles.length > 0 && !vehicleId) {
+    if (open && vehicles.length > 0 && !vehicleId) {
       setVehicleId(vehicles[0].id);
     }
-  }, [vehicles, vehicleId]);
+  }, [open, vehicles, vehicleId]);
 
   const selectedVehicle = vehicles.find((v) => v.id === vehicleId);
   const fuelType = selectedVehicle?.fuelType ?? "e10";
 
-  // Auto-fill average price when vehicle changes
+  // Auto-fill price from data.gouv average when vehicle or prices change
   useEffect(() => {
-    if (prices && selectedVehicle && !pricePerLiter) {
-      const key = FUEL_PRICE_KEYS[selectedVehicle.fuelType];
-      const avgPrice = prices[key];
-      if (avgPrice) {
-        setPricePerLiter(avgPrice.toFixed(3));
-      }
+    if (!prices || !selectedVehicle || userEditedPrice) return;
+    const key = FUEL_PRICE_KEYS[selectedVehicle.fuelType];
+    const avgPrice = prices[key];
+    if (avgPrice) {
+      setPricePerLiter(avgPrice.toFixed(3));
     }
-  }, [prices, selectedVehicle, pricePerLiter]);
+  }, [prices, selectedVehicle, userEditedPrice]);
 
   const parsedLiters = parseFloat(liters) || 0;
   const parsedPrice = parseFloat(pricePerLiter) || 0;
@@ -107,13 +107,20 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
     setLiters("");
     setKm("");
     setPricePerLiter("");
+    setUserEditedPrice(false);
     setDate(new Date().toISOString().split("T")[0]);
     setOpen(false);
   }
 
   function handleVehicleChange(id: string) {
     setVehicleId(id);
-    setPricePerLiter(""); // Reset to auto-fill new fuel type price
+    setUserEditedPrice(false); // Reset so price auto-fills for new fuel type
+    setPricePerLiter("");
+  }
+
+  function handlePriceChange(value: string) {
+    setPricePerLiter(value);
+    setUserEditedPrice(true);
   }
 
   return (
@@ -216,7 +223,7 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
                   min="0"
                   placeholder="1.899"
                   value={pricePerLiter}
-                  onChange={(e) => setPricePerLiter(e.target.value)}
+                  onChange={(e) => handlePriceChange(e.target.value)}
                   className="h-10 font-mono"
                 />
               </div>
