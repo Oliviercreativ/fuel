@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Fuel, LayoutDashboard, Car } from "lucide-react";
+import { Fuel, Car, MapPin } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/vehicules", label: "Véhicules", icon: Car },
   { href: "/pleins", label: "Pleins", icon: Fuel },
+  { href: "/idf", label: "IDF", icon: MapPin },
 ];
 
 export function Navbar() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Fuel } from "lucide-react";
+import { Plus, Fuel, Star, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -24,6 +25,7 @@ import {
 import { type Vehicle, FUEL_TYPES } from "@/lib/vehicles";
 import type { FuelType } from "@/lib/vehicles";
 import type { FuelPrices } from "@/app/api/fuel-prices/route";
+import { type FavoriteStation, getFavorites, getStationPrice } from "@/lib/favorites";
 
 type AddRefuelDialogProps = {
   vehicles: Vehicle[];
@@ -46,6 +48,8 @@ const FUEL_PRICE_KEYS: Record<FuelType, keyof Omit<FuelPrices, "stations" | "upd
   gplc: "gplc",
 };
 
+type PriceSource = "station" | "average" | "manual";
+
 export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
   const [open, setOpen] = useState(false);
   const [vehicleId, setVehicleId] = useState("");
@@ -55,12 +59,16 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [prices, setPrices] = useState<FuelPrices | null>(null);
   const [userEditedPrice, setUserEditedPrice] = useState(false);
+  const [favorites, setFavorites] = useState<FavoriteStation[]>([]);
+  const [selectedStationId, setSelectedStationId] = useState("");
+  const [priceSource, setPriceSource] = useState<PriceSource>("average");
 
-  // Load average prices from data.gouv API
+  // Load favorites + average prices on open
   useEffect(() => {
     if (!open) return;
+    setFavorites(getFavorites());
     fetch("/api/fuel-prices")
-      .then((res) => res.ok ? res.json() : null)
+      .then((res) => (res.ok ? res.json() : null))
       .then(setPrices)
       .catch(() => {});
   }, [open]);
@@ -74,16 +82,32 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
 
   const selectedVehicle = vehicles.find((v) => v.id === vehicleId);
   const fuelType = selectedVehicle?.fuelType ?? "e10";
+  const selectedStation = favorites.find((f) => f.id === selectedStationId);
 
-  // Auto-fill price from data.gouv average when vehicle or prices change
+  // Auto-fill price: station favorite > national average
   useEffect(() => {
-    if (!prices || !selectedVehicle || userEditedPrice) return;
-    const key = FUEL_PRICE_KEYS[selectedVehicle.fuelType];
-    const avgPrice = prices[key];
-    if (avgPrice) {
-      setPricePerLiter(avgPrice.toFixed(3));
+    if (userEditedPrice) return;
+
+    // Try station price first
+    if (selectedStation) {
+      const stationPrice = getStationPrice(selectedStation, fuelType);
+      if (stationPrice) {
+        setPricePerLiter(stationPrice.toFixed(3));
+        setPriceSource("station");
+        return;
+      }
     }
-  }, [prices, selectedVehicle, userEditedPrice]);
+
+    // Fallback to national average
+    if (prices && selectedVehicle) {
+      const key = FUEL_PRICE_KEYS[selectedVehicle.fuelType];
+      const avgPrice = prices[key];
+      if (avgPrice) {
+        setPricePerLiter(avgPrice.toFixed(3));
+        setPriceSource("average");
+      }
+    }
+  }, [prices, selectedVehicle, selectedStation, fuelType, userEditedPrice]);
 
   const parsedLiters = parseFloat(liters) || 0;
   const parsedPrice = parseFloat(pricePerLiter) || 0;
@@ -108,6 +132,8 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
     setKm("");
     setPricePerLiter("");
     setUserEditedPrice(false);
+    setSelectedStationId("");
+    setPriceSource("average");
     setDate(new Date().toISOString().split("T")[0]);
     setOpen(false);
   }
@@ -119,9 +145,16 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
     setPricePerLiter("");
   }
 
+  function handleStationChange(id: string | null) {
+    setSelectedStationId(id ?? "");
+    setUserEditedPrice(false);
+    setPricePerLiter("");
+  }
+
   function handlePriceChange(value: string) {
     setPricePerLiter(value);
     setUserEditedPrice(true);
+    setPriceSource("manual");
   }
 
   return (
@@ -138,7 +171,9 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
         <DialogHeader>
           <DialogTitle>Ajouter un plein</DialogTitle>
           <DialogDescription>
-            Le prix moyen est pré-rempli automatiquement depuis data.gouv.
+            {favorites.length > 0
+              ? "Choisissez une station favorite pour un prix précis."
+              : "Le prix moyen national est pré-rempli depuis data.gouv."}
           </DialogDescription>
         </DialogHeader>
 
@@ -193,6 +228,37 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
               </div>
             )}
 
+            {/* Station favorite */}
+            {favorites.length > 0 && (
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5">
+                  <Star className="size-3 fill-fuel text-fuel" strokeWidth={1.5} />
+                  Station favorite
+                </Label>
+                <Select value={selectedStationId} onValueChange={handleStationChange}>
+                  <SelectTrigger className="h-10 w-full">
+                    <SelectValue placeholder="Moyenne nationale (data.gouv)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">
+                      Moyenne nationale (data.gouv)
+                    </SelectItem>
+                    {favorites.map((f) => (
+                      <SelectItem key={f.id} value={f.id}>
+                        {f.name} — {f.city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedStation && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+                    <MapPin className="size-3" strokeWidth={1.5} />
+                    {selectedStation.address}, {selectedStation.cp} {selectedStation.city}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Liters + Price */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -211,11 +277,16 @@ export function AddRefuelDialog({ vehicles, onAdd }: AddRefuelDialogProps) {
               <div className="space-y-1.5">
                 <Label htmlFor="price">
                   Prix/L (€) *
-                  {prices && (
-                    <span className="ml-1 text-[10px] font-normal text-text-muted">
-                      moy. auto
-                    </span>
-                  )}
+                  <Badge
+                    variant="outline"
+                    className="ml-1.5 h-4 border-border/60 px-1.5 text-[9px] font-normal text-text-muted"
+                  >
+                    {priceSource === "station"
+                      ? "station"
+                      : priceSource === "average"
+                        ? "moy. nat."
+                        : "manuel"}
+                  </Badge>
                 </Label>
                 <Input
                   id="price"
