@@ -241,8 +241,14 @@ export default function IdfPage() {
           </div>
         </div>
 
+        {/* Tip */}
+        <div className="mt-4 flex items-center gap-2 rounded-lg bg-fuel-light px-4 py-2.5 text-xs text-fuel">
+          <Star className="size-3.5 shrink-0" strokeWidth={1.5} />
+          Ajoutez en favoris une station service pour calculer le prix du plein
+        </div>
+
         {/* Filters */}
-        <Card className="mt-6 border-0 shadow-card">
+        <Card className="mt-4 border-0 shadow-card">
           <CardContent className="p-4">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {/* Department */}

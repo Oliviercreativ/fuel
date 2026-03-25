@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { Fuel, Car, MapPin } from "lucide-react";
 
 const navItems = [
+  { href: "/idf", label: "Stations IDF", icon: MapPin },
   { href: "/vehicules", label: "Véhicules", icon: Car },
   { href: "/pleins", label: "Pleins", icon: Fuel },
-  { href: "/idf", label: "IDF", icon: MapPin },
 ];
 
 export function Navbar() {
