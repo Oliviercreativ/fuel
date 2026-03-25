@@ -33,58 +33,51 @@ export default function IdfPage() {
   const reducedMotion = useReducedMotion() ?? false;
   const { favorites, addFavorite, removeFavorite, isFavorite } = useFavorites();
 
-  // Facets
   const [facets, setFacets] = useState<IdfFacets | null>(null);
 
-  // Filters — "all" = no filter active
-  const [depcode, setDepcode] = useState("all");
+  // Filters — null = no filter
+  const [depcode, setDepcode] = useState<string | null>(null);
   const [cities, setCities] = useState<string[]>([]);
-  const [brand, setBrand] = useState("all");
-  const [fuelFilter, setFuelFilter] = useState("all");
-
-  const activeDepcode = depcode !== "all" ? depcode : "";
-  const activeBrand = brand !== "all" ? brand : "";
-  const activeFuel = fuelFilter !== "all" ? fuelFilter : "";
+  const [brand, setBrand] = useState<string | null>(null);
+  const [fuelFilter, setFuelFilter] = useState<string | null>(null);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
-  // Results
   const [stations, setStations] = useState<IdfStation[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const LIMIT = 20;
 
-  // Load facets — reloads when ANY filter changes (cascading AND)
+  // Facets reload on every filter change (cascading AND)
   useEffect(() => {
     const params = new URLSearchParams({ action: "facets" });
-    if (activeDepcode) params.set("depcode", activeDepcode);
+    if (depcode) params.set("depcode", depcode);
     if (cities.length === 1) params.set("city", cities[0]);
-    if (activeBrand) params.set("brand", activeBrand);
-    if (activeFuel) params.set("fuel", activeFuel);
+    if (brand) params.set("brand", brand);
+    if (fuelFilter) params.set("fuel", fuelFilter);
     fetch(`/api/idf-stations?${params}`)
       .then((res) => res.json())
       .then(setFacets)
       .catch(() => {});
-  }, [activeDepcode, cities, activeBrand, activeFuel]);
+  }, [depcode, cities, brand, fuelFilter]);
 
-  // Reset cities when department changes
+  // Reset downstream filters when department changes
   useEffect(() => {
     setCities([]);
-  }, [activeDepcode]);
+  }, [depcode]);
 
   // Fetch stations
   const fetchStations = useCallback(
     (newOffset = 0) => {
       setLoading(true);
 
-      // Multi-city: parallel fetch
       if (cities.length > 1) {
         const fetches = cities.map((c) => {
           const params = new URLSearchParams({ limit: "100", offset: "0" });
-          if (activeDepcode) params.set("depcode", activeDepcode);
+          if (depcode) params.set("depcode", depcode);
           params.set("city", c);
-          if (activeBrand) params.set("brand", activeBrand);
-          if (activeFuel) params.set("fuel", activeFuel);
+          if (brand) params.set("brand", brand);
+          if (fuelFilter) params.set("fuel", fuelFilter);
           return fetch(`/api/idf-stations?${params}`).then((res) => res.json());
         });
 
@@ -106,10 +99,10 @@ export default function IdfPage() {
         limit: String(LIMIT),
         offset: String(newOffset),
       });
-      if (activeDepcode) params.set("depcode", activeDepcode);
+      if (depcode) params.set("depcode", depcode);
       if (cities.length === 1) params.set("city", cities[0]);
-      if (activeBrand) params.set("brand", activeBrand);
-      if (activeFuel) params.set("fuel", activeFuel);
+      if (brand) params.set("brand", brand);
+      if (fuelFilter) params.set("fuel", fuelFilter);
 
       fetch(`/api/idf-stations?${params}`)
         .then((res) => res.json())
@@ -125,7 +118,7 @@ export default function IdfPage() {
         .catch(() => {})
         .finally(() => setLoading(false));
     },
-    [activeDepcode, cities, activeBrand, activeFuel]
+    [depcode, cities, brand, fuelFilter]
   );
 
   useEffect(() => {
@@ -133,14 +126,18 @@ export default function IdfPage() {
   }, [fetchStations]);
 
   function clearFilters() {
-    setDepcode("all");
+    setDepcode(null);
     setCities([]);
-    setBrand("all");
-    setFuelFilter("all");
+    setBrand(null);
+    setFuelFilter(null);
   }
 
   function addCity(city: string | null) {
     if (!city) return;
+    if (city === "__reset_cities__") {
+      setCities([]);
+      return;
+    }
     if (!cities.includes(city)) {
       setCities((prev) => [...prev, city]);
     }
@@ -150,9 +147,9 @@ export default function IdfPage() {
     setCities((prev) => prev.filter((c) => c !== city));
   }
 
-  const hasFilters = activeDepcode || cities.length > 0 || activeBrand || activeFuel;
+  const hasFilters = depcode || cities.length > 0 || brand || fuelFilter;
   const hasMore = cities.length <= 1 && stations.length < totalCount;
-  const depName = facets?.departments.find((d) => d.depcode === activeDepcode)?.depname;
+  const depName = facets?.departments.find((d) => d.depcode === depcode)?.depname;
 
   function toggleFavorite(station: IdfStation) {
     if (isFavorite(station.id)) {
@@ -254,12 +251,11 @@ export default function IdfPage() {
                   <Building2 className="size-3" strokeWidth={1.5} />
                   Département
                 </label>
-                <Select value={depcode} onValueChange={(v) => setDepcode(v ?? "all")}>
+                <Select value={depcode} onValueChange={setDepcode}>
                   <SelectTrigger className="h-10 w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Tous les départements" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tous les départements</SelectItem>
                     {facets?.departments.map((d) => (
                       <SelectItem key={d.depcode} value={d.depcode}>
                         {d.depcode} — {d.depname}
@@ -280,21 +276,11 @@ export default function IdfPage() {
                     </span>
                   )}
                 </label>
-                <Select
-                  value=""
-                  onValueChange={(v) => {
-                    if (v === "all") {
-                      setCities([]);
-                    } else {
-                      addCity(v);
-                    }
-                  }}
-                  disabled={!activeDepcode}
-                >
+                <Select value={null} onValueChange={addCity} disabled={!depcode}>
                   <SelectTrigger className="h-10 w-full">
                     <SelectValue
                       placeholder={
-                        !activeDepcode
+                        !depcode
                           ? "Choisir un département"
                           : cities.length > 0
                             ? `${cities.length} ville${cities.length > 1 ? "s" : ""} · Ajouter…`
@@ -304,7 +290,12 @@ export default function IdfPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {cities.length > 0 && (
-                      <SelectItem value="all">Toutes les villes</SelectItem>
+                      <SelectItem
+                        value="__reset_cities__"
+                        className="text-text-muted"
+                      >
+                        Toutes les villes (réinitialiser)
+                      </SelectItem>
                     )}
                     {availableCities.map((c) => (
                       <SelectItem key={c.city} value={c.city}>
@@ -321,12 +312,11 @@ export default function IdfPage() {
                   <Fuel className="size-3" strokeWidth={1.5} />
                   Carburant
                 </label>
-                <Select value={fuelFilter} onValueChange={(v) => setFuelFilter(v ?? "all")}>
+                <Select value={fuelFilter} onValueChange={setFuelFilter}>
                   <SelectTrigger className="h-10 w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Tous les carburants" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tous les carburants</SelectItem>
                     {facets?.fuels.map((f) => (
                       <SelectItem key={f.fuel} value={f.fuel}>
                         {f.fuel} ({f.count})
@@ -342,12 +332,11 @@ export default function IdfPage() {
                   <Tag className="size-3" strokeWidth={1.5} />
                   Enseigne
                 </label>
-                <Select value={brand} onValueChange={(v) => setBrand(v ?? "all")}>
+                <Select value={brand} onValueChange={setBrand}>
                   <SelectTrigger className="h-10 w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Toutes les enseignes" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Toutes les enseignes</SelectItem>
                     {facets?.brands.map((b) => (
                       <SelectItem key={b.brand} value={b.brand}>
                         {b.brand} ({b.count})
@@ -365,7 +354,7 @@ export default function IdfPage() {
                   <Badge
                     variant="secondary"
                     className="cursor-pointer gap-1 text-xs"
-                    onClick={() => setDepcode("all")}
+                    onClick={() => setDepcode(null)}
                   >
                     {depName}
                     <X className="size-3" />
@@ -387,7 +376,7 @@ export default function IdfPage() {
                   <Badge
                     variant="secondary"
                     className="cursor-pointer gap-1 text-xs"
-                    onClick={() => setFuelFilter("all")}
+                    onClick={() => setFuelFilter(null)}
                   >
                     <Fuel className="size-2.5" />
                     {fuelFilter}
@@ -398,7 +387,7 @@ export default function IdfPage() {
                   <Badge
                     variant="secondary"
                     className="cursor-pointer gap-1 text-xs"
-                    onClick={() => setBrand("all")}
+                    onClick={() => setBrand(null)}
                   >
                     {brand}
                     <X className="size-3" />
