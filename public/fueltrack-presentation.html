@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FuelTrack — Carousel LinkedIn</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #E7E5E4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 24px;
+    }
+
+    @page {
+      size: 1080px 1080px;
+      margin: 0;
+    }
+
+    @media print {
+      body { background: none; gap: 0; padding: 0; }
+      .slide { box-shadow: none !important; border-radius: 0 !important; }
+      .slide + .slide { page-break-before: always; }
+    }
+
+    .slide {
+      width: 1080px;
+      height: 1080px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    /* ========== SLIDE 1 — Cover ========== */
+    .slide-cover {
+      background: #FAFAF9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .slide-cover .bg-circle {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #E8520A10 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .slide-cover .logo-box {
+      width: 120px;
+      height: 120px;
+      background: #E8520A;
+      border-radius: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 40px;
+      box-shadow: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide-cover .logo-box svg { width: 56px; height: 56px; }
+
+    .slide-cover h1 {
+      font-size: 72px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide-cover h1 span { color: #E8520A; }
+
+    .slide-cover .tagline {
+      font-size: 28px;
+      color: #57534E;
+      margin-top: 20px;
+      font-weight: 500;
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide-cover .badges {
+      display: flex;
+      gap: 12px;
+      margin-top: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide-cover .badge {
+      background: white;
+      border: 1px solid #E7E5E4;
+      border-radius: 100px;
+      padding: 10px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #57534E;
+    }
+
+    .slide-cover .badge.accent {
+      background: #FDF1EB;
+      border-color: #E8520A30;
+      color: #E8520A;
+    }
+
+    .slide-cover .author {
+      position: absolute;
+      bottom: 48px;
+      font-size: 16px;
+      color: #A8A29E;
+      z-index: 1;
+    }
+
+    .slide-cover .author strong { color: #57534E; }
+
+    /* ========== SLIDE 2 — Le problème ========== */
+    .slide-problem {
+      background: #1C1917;
+      color: #FAFAF9;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px;
+    }
+
+    .slide-problem .label {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #E8520A;
+      margin-bottom: 32px;
+    }
+
+    .slide-problem h2 {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -1px;
+      margin-bottom: 40px;
+    }
+
+    .slide-problem .pain-points {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .slide-problem .pain {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      font-size: 22px;
+      color: #A8A29E;
+      line-height: 1.4;
+    }
+
+    .slide-problem .pain .x-icon {
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    /* ========== SLIDE 3 — La solution ========== */
+    .slide-solution {
+      background: #FAFAF9;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px;
+    }
+
+    .slide-solution .label {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #E8520A;
+      margin-bottom: 32px;
+    }
+
+    .slide-solution h2 {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -1px;
+      margin-bottom: 48px;
+    }
+
+    .slide-solution h2 span { color: #E8520A; }
+
+    .slide-solution .solutions {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .slide-solution .sol {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      font-size: 22px;
+      color: #57534E;
+      line-height: 1.4;
+    }
+
+    .slide-solution .sol .check-icon {
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .slide-solution .sol strong { color: #1C1917; }
+
+    /* ========== SLIDE 4 — Stations IDF ========== */
+    .slide-feature {
+      background: #FAFAF9;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px;
+    }
+
+    .slide-feature .label {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #E8520A;
+      margin-bottom: 24px;
+    }
+
+    .slide-feature h2 {
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -1px;
+      margin-bottom: 40px;
+    }
+
+    .slide-feature .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .slide-feature .feat-card {
+      background: white;
+      border: 1px solid #E7E5E4;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .slide-feature .feat-card .icon {
+      width: 48px;
+      height: 48px;
+      background: #FDF1EB;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .slide-feature .feat-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .slide-feature .feat-card p {
+      font-size: 16px;
+      color: #57534E;
+      line-height: 1.5;
+    }
+
+    /* ========== SLIDE 5 — Chiffres ========== */
+    .slide-stats {
+      background: #E8520A;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .slide-stats .label {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 48px;
+    }
+
+    .slide-stats .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .slide-stats .stat-box {
+      background: rgba(255,255,255,0.15);
+      border-radius: 24px;
+      padding: 40px 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .slide-stats .stat-box .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .slide-stats .stat-box .unit {
+      font-size: 18px;
+      font-weight: 500;
+      opacity: 0.8;
+      margin-top: 8px;
+    }
+
+    .slide-stats .source {
+      margin-top: 48px;
+      font-size: 16px;
+      opacity: 0.6;
+    }
+
+    /* ========== SLIDE 6 — CTA ========== */
+    .slide-cta {
+      background: #FAFAF9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .slide-cta .bg-circle {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #E8520A08 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .slide-cta h2 {
+      font-size: 52px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      line-height: 1.15;
+      position: relative;
+      z-index: 1;
+      max-width: 700px;
+    }
+
+    .slide-cta h2 span { color: #E8520A; }
+
+    .slide-cta .subtitle {
+      font-size: 22px;
+      color: #57534E;
+      margin-top: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide-cta .cta-btn {
+      margin-top: 48px;
+      background: #E8520A;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 20px 48px;
+      font-size: 20px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      box-shadow: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide-cta .privacy {
+      margin-top: 32px;
+      font-size: 14px;
+      color: #A8A29E;
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide-cta .author {
+      position: absolute;
+      bottom: 48px;
+      font-size: 16px;
+      color: #A8A29E;
+      z-index: 1;
+    }
+
+    .slide-cta .author strong { color: #57534E; }
+  </style>
+</head>
+<body>
+
+  <!-- SLIDE 1 — Cover -->
+  <div class="slide slide-cover">
+    <div class="bg-circle"></div>
+    <div class="logo-box">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 2h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+        <path d="M1 6h12"/>
+        <path d="M13 6l3.5-3.5a1.5 1.5 0 0 1 2.12 2.12L17 6.24V11a1 1 0 0 1-1 1h-3"/>
+      </svg>
+    </div>
+    <h1>Fuel<span>Track</span></h1>
+    <p class="tagline">Suivez chaque litre, maîtrisez chaque euro.</p>
+    <div class="badges">
+      <span class="badge accent">Prix en temps réel</span>
+      <span class="badge">Open Data</span>
+      <span class="badge">100% gratuit</span>
+    </div>
+    <p class="author">Par <strong>Olivier Démontant</strong></p>
+  </div>
+
+  <!-- SLIDE 2 — Le problème -->
+  <div class="slide slide-problem">
+    <p class="label">Le constat</p>
+    <h2>Faire le plein sans savoir combien ça coûte vraiment.</h2>
+    <div class="pain-points">
+      <div class="pain">
+        <svg class="x-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        On ne sait jamais quel est le prix moyen du carburant
+      </div>
+      <div class="pain">
+        <svg class="x-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        Impossible de comparer les stations autour de chez soi
+      </div>
+      <div class="pain">
+        <svg class="x-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        Aucun suivi simple de sa consommation et de ses dépenses
+      </div>
+      <div class="pain">
+        <svg class="x-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        Les applis existantes sont soit payantes, soit usines à gaz
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 — La solution -->
+  <div class="slide slide-solution">
+    <p class="label">La solution</p>
+    <h2>FuelTrack utilise l'<span>open data</span> du gouvernement.</h2>
+    <div class="solutions">
+      <div class="sol">
+        <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong>Prix en temps réel</strong> — moyenne nationale sur ~9 900 stations via data.gouv.fr
+      </div>
+      <div class="sol">
+        <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong>839 stations IDF</strong> — filtrez par département, ville, carburant et enseigne
+      </div>
+      <div class="sol">
+        <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong>Stations favorites</strong> — le prix exact de votre station pour calculer chaque plein
+      </div>
+      <div class="sol">
+        <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong>Suivi complet</strong> — véhicules, pleins, conso L/100km, coût journalier
+      </div>
+      <div class="sol">
+        <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <strong>Itinéraire Google Maps</strong> — un clic pour y aller
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4 — Features -->
+  <div class="slide slide-feature">
+    <p class="label">Fonctionnalités</p>
+    <h2>Tout ce qu'il faut, rien de plus.</h2>
+    <div class="feature-grid">
+      <div class="feat-card">
+        <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E8520A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h3>Stations IDF</h3>
+        <p>Filtrage intelligent en cascade. Comparez plusieurs villes en même temps.</p>
+      </div>
+      <div class="feat-card">
+        <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E8520A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <h3>Favoris</h3>
+        <p>Sauvegardez vos stations. Le prix est automatiquement utilisé pour vos pleins.</p>
+      </div>
+      <div class="feat-card">
+        <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E8520A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></div>
+        <h3>Véhicules</h3>
+        <p>Gérez votre flotte. Marque, modèle, carburant, kilométrage.</p>
+      </div>
+      <div class="feat-card">
+        <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E8520A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M1 6h12"/><path d="M13 6l3.5-3.5a1.5 1.5 0 0 1 2.12 2.12L17 6.24V11a1 1 0 0 1-1 1h-3"/></svg></div>
+        <h3>Pleins</h3>
+        <p>Historique par jour. Calcul auto du coût avec le prix de votre station.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5 — Chiffres -->
+  <div class="slide slide-stats">
+    <p class="label">Les données</p>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="num">9 900</div>
+        <div class="unit">stations en France</div>
+      </div>
+      <div class="stat-box">
+        <div class="num">839</div>
+        <div class="unit">stations en IDF</div>
+      </div>
+      <div class="stat-box">
+        <div class="num">6</div>
+        <div class="unit">carburants suivis</div>
+      </div>
+    </div>
+    <p class="source">Source : data.economie.gouv.fr &middot; data.iledefrance.fr</p>
+  </div>
+
+  <!-- SLIDE 6 — CTA -->
+  <div class="slide slide-cta">
+    <div class="bg-circle"></div>
+    <h2>Arrêtez de deviner.<br><span>Commencez à suivre.</span></h2>
+    <p class="subtitle">Gratuit. Sans inscription. Sans pub.</p>
+    <div class="cta-btn">Essayer FuelTrack</div>
+    <p class="privacy">Aucune donnée n'est stockée sur nos serveurs</p>
+    <p class="author">Réalisé par <strong>Olivier Démontant</strong></p>
+  </div>
+
+</body>
+</html>
