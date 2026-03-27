@@ -275,10 +275,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-border/50 py-6 text-center text-xs text-text-muted">
-        FuelTrack &copy; 2026 - Réalisé par Olivier Démontant - Aucune donnée n&apos;est stockée sur nos serveurs
-      </footer>
     </div>
   );
 }

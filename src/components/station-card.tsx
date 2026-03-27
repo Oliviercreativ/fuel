@@ -40,17 +40,18 @@ function getPrices(station: IdfStation): PriceEntry[] {
   ].filter((p) => p.price !== null);
 }
 
-function formatUpdate(dateStr: string): string {
+function formatUpdate(dateStr: string): { line1: string; line2?: string } {
   const date = new Date(dateStr);
   const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffH = Math.floor(diffMs / 3600000);
+  const diffH = (now.getTime() - date.getTime()) / 3600000;
+  const time = date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 
-  if (diffH < 1) return "< 1h";
-  if (diffH < 24) return `${diffH}h`;
-  const diffD = Math.floor(diffH / 24);
-  if (diffD === 1) return "Hier";
-  return `${diffD}j`;
+  if (diffH < 1) return { line1: "< 1h" };
+  if (diffH < 24) return { line1: time };
+  return {
+    line1: date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }),
+    line2: time,
+  };
 }
 
 type StationCardProps = {
@@ -88,7 +89,7 @@ export function StationCard({
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="truncate text-sm font-semibold text-text-primary">
+                <h3 className="line-clamp-2 text-sm font-semibold text-text-primary">
                   {station.name}
                 </h3>
                 {is24h && (
@@ -107,9 +108,15 @@ export function StationCard({
               )}
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              <span className="text-[11px] text-text-muted">
-                {station.update ? formatUpdate(station.update) : ""}
-              </span>
+              {station.update && (() => {
+                const { line1, line2 } = formatUpdate(station.update);
+                return (
+                  <span className="flex flex-col items-end text-[11px] leading-tight text-text-muted">
+                    <span>{line1}</span>
+                    {line2 && <span>{line2}</span>}
+                  </span>
+                );
+              })()}
               {onToggleFavorite && (
                 <Button
                   variant="ghost"

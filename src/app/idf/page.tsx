@@ -174,8 +174,29 @@ export default function IdfPage() {
 
   const availableCities = facets?.cities.filter((c) => !cities.includes(c.city)) ?? [];
 
-  const displayedStations = showFavoritesOnly
-    ? stations.filter((s) => isFavorite(s.id))
+  const displayedStations: IdfStation[] = showFavoritesOnly
+    ? favorites.map((f) => ({
+        id: f.id,
+        name: f.name,
+        brand: f.brand,
+        address: f.address,
+        city: f.city,
+        cp: f.cp,
+        depname: "",
+        depcode: "",
+        fuel: [],
+        shortage: [],
+        services: [],
+        automate_24_24: null,
+        update: f.addedAt,
+        geo_point: null,
+        price_gazole: f.price_gazole,
+        price_sp95: f.price_sp95,
+        price_sp98: f.price_sp98,
+        price_e10: f.price_e10,
+        price_e85: f.price_e85,
+        price_gplc: f.price_gplc,
+      }))
     : stations;
 
   return (
